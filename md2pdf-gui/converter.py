@@ -1,17 +1,6 @@
 import markdown
 import os
-
-# 延迟导入weasyprint，避免在Windows上因缺少GTK库而无法导入
-_html_converter = None
-_css_converter = None
-
-def _get_weasyprint():
-    global _html_converter, _css_converter
-    if _html_converter is None:
-        from weasyprint import HTML, CSS
-        _html_converter = HTML
-        _css_converter = CSS
-    return _html_converter, _css_converter
+from weasyprint import HTML, CSS
 
 class MarkdownConverter:
     def __init__(self, css_path=None):
@@ -81,7 +70,6 @@ class MarkdownConverter:
     def _html_to_pdf(self, html_content, output_path):
         """将HTML转换为PDF"""
         try:
-            HTML, CSS = _get_weasyprint()
             if self.css_path and os.path.exists(self.css_path):
                 css = CSS(filename=self.css_path)
                 HTML(string=html_content).write_pdf(output_path, stylesheets=[css])
