@@ -72,6 +72,27 @@ class MarkdownConverter:
         
         return self.HTML_TEMPLATE.format(content=html)
     
+    def convert_text(self, md_text, output_path):
+        """将markdown文本转换为PDF"""
+        try:
+            if not md_text.strip():
+                return False, "内容为空"
+            
+            # 转换为HTML
+            html_content = self._markdown_to_html(md_text)
+            
+            # 生成PDF
+            self._html_to_pdf(html_content, output_path)
+            
+            # 验证输出文件
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return True, f"PDF已保存: {output_path}"
+            else:
+                return False, "PDF生成失败，输出文件无效"
+                
+        except Exception as e:
+            return False, f"转换失败: {str(e)}"
+    
     def _html_to_pdf(self, html_content, output_path):
         """将HTML转换为PDF"""
         try:
