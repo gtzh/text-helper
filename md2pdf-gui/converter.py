@@ -3,8 +3,24 @@ import os
 from weasyprint import HTML, CSS
 
 class MarkdownConverter:
+    HTML_TEMPLATE = """<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Markdown PDF</title>
+</head>
+<body>
+    {content}
+</body>
+</html>"""
+    
     def __init__(self, css_path=None):
-        self.css_path = css_path
+        if css_path is None:
+            # 默认使用同目录下的styles/github.css
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            css_path = os.path.join(base_dir, 'styles', 'github.css')
+        
+        self.css_path = css_path if os.path.exists(css_path) else None
         
     def convert_file(self, input_path, output_path):
         """将markdown文件转换为PDF"""
@@ -37,6 +53,8 @@ class MarkdownConverter:
                 
         except UnicodeDecodeError:
             return False, "文件编码错误，请确保文件为UTF-8编码"
+        except (IOError, OSError) as e:
+            return False, f"文件读写错误: {str(e)}"
         except Exception as e:
             return False, f"转换失败: {str(e)}"
     
@@ -52,20 +70,7 @@ class MarkdownConverter:
         
         html = markdown.markdown(md_content, extensions=extensions)
         
-        full_html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>Markdown PDF</title>
-        </head>
-        <body>
-            {html}
-        </body>
-        </html>
-        """
-        
-        return full_html
+        return self.HTML_TEMPLATE.format(content=html)
     
     def _html_to_pdf(self, html_content, output_path):
         """将HTML转换为PDF"""
