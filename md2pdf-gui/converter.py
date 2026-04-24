@@ -22,14 +22,24 @@ class MarkdownConverter:
         
         self.css_path = css_path if os.path.exists(css_path) else None
         
+    def _convert_common(self, html_content, output_path):
+        """公共转换逻辑：生成PDF并验证"""
+        try:
+            self._html_to_pdf(html_content, output_path)
+            
+            # 验证输出文件
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return True, f"PDF已保存: {output_path}"
+            else:
+                return False, "PDF生成失败，输出文件无效"
+        except Exception as e:
+            return False, f"转换失败: {str(e)}"
+    
     def convert_file(self, input_path, output_path):
         """将markdown文件转换为PDF"""
         # 验证输入文件
         if not os.path.exists(input_path):
             return False, f"文件不存在: {input_path}"
-        
-        if not input_path.endswith('.md'):
-            return False, "请输入markdown文件(.md)"
         
         try:
             # 读取markdown文件
@@ -42,21 +52,13 @@ class MarkdownConverter:
             # 转换为HTML
             html_content = self._markdown_to_html(md_content)
             
-            # 生成PDF
-            self._html_to_pdf(html_content, output_path)
-            
-            # 验证输出文件
-            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-                return True, f"PDF已保存: {output_path}"
-            else:
-                return False, "PDF生成失败，输出文件无效"
+            # 使用公共逻辑
+            return self._convert_common(html_content, output_path)
                 
         except UnicodeDecodeError:
             return False, "文件编码错误，请确保文件为UTF-8编码"
         except (IOError, OSError) as e:
             return False, f"文件读写错误: {str(e)}"
-        except Exception as e:
-            return False, f"转换失败: {str(e)}"
     
     def _markdown_to_html(self, md_content):
         """将markdown转换为HTML"""
@@ -81,14 +83,8 @@ class MarkdownConverter:
             # 转换为HTML
             html_content = self._markdown_to_html(md_text)
             
-            # 生成PDF
-            self._html_to_pdf(html_content, output_path)
-            
-            # 验证输出文件
-            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-                return True, f"PDF已保存: {output_path}"
-            else:
-                return False, "PDF生成失败，输出文件无效"
+            # 使用公共逻辑
+            return self._convert_common(html_content, output_path)
                 
         except Exception as e:
             return False, f"转换失败: {str(e)}"

@@ -97,42 +97,17 @@ class MarkdownToPDFApp:
             messagebox.showwarning("警告", "内容为空，请先打开文件或输入内容")
             return
         
-        # 跟踪是否使用了临时文件
-        temp_file_path = None
-        
-        # 如果没有打开文件，使用临时文件
-        if not self.current_file:
-            import tempfile
-            temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False, encoding='utf-8')
-            temp_file.write(content)
-            temp_file.close()
-            input_file = temp_file.name
-            temp_file_path = temp_file.name
-        else:
-            # 保存编辑区内容到当前文件
-            try:
-                with open(self.current_file, 'w', encoding='utf-8') as f:
-                    f.write(content)
-                input_file = self.current_file
-            except Exception as e:
-                messagebox.showerror("错误", f"无法保存文件: {str(e)}")
-                return
-        
         # 获取保存路径
+        initial_file = os.path.splitext(os.path.basename(self.current_file))[0] + ".pdf" if self.current_file else "output.pdf"
+        
         output_path = filedialog.asksaveasfilename(
             title="保存PDF",
             defaultextension=".pdf",
             filetypes=[("PDF文件", "*.pdf")],
-            initialfile=os.path.splitext(os.path.basename(input_file))[0] + ".pdf" if self.current_file else "output.pdf"
+            initialfile=initial_file
         )
         
         if not output_path:
-            # 如果取消了保存对话框，清理临时文件
-            if temp_file_path:
-                try:
-                    os.unlink(temp_file_path)
-                except:
-                    pass
             return
         
         # 更新状态
@@ -140,14 +115,9 @@ class MarkdownToPDFApp:
         self.root.update()
         
         # 执行转换
-        success, message = self.converter.convert_file(input_file, output_path)
-        
-        # 清理临时文件
-        if temp_file_path:
-            try:
-                os.unlink(temp_file_path)
-            except:
-                pass
+        # 优化：直接使用convert_text避免重复读取文件
+        # 因为content已经是最新内容，无需再通过convert_file读取文件
+        success, message = self.converter.convert_text(content, output_path)
         
         if success:
             messagebox.showinfo("成功", message)
