@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 from flask import Flask, jsonify, request, send_file, Response, stream_with_context
+import markdown
 import config
 
 app = Flask(__name__, static_folder="static")
@@ -68,8 +69,6 @@ def chat():
     client = OpenAI(base_url=base_url, api_key=api_key)
 
     def generate():
-        import markdown
-        md = markdown.Markdown(extensions=["fenced_code", "tables"])
         buf = ""
         try:
             stream = client.chat.completions.create(
@@ -81,7 +80,7 @@ def chat():
                 if chunk.choices[0].delta.content:
                     buf += chunk.choices[0].delta.content
                     yield f"data: {json.dumps({'chunk': chunk.choices[0].delta.content}, ensure_ascii=False)}\n\n"
-            html = md.convert(buf)
+            html = markdown.markdown(buf, extensions=["fenced_code", "tables"])
             yield f"data: {json.dumps({'done': True, 'html': html, 'content': buf}, ensure_ascii=False)}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
@@ -98,4 +97,4 @@ def chat():
 
 if __name__ == "__main__":
     print("Starting text-helper server on http://127.0.0.1:5000")
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=os.environ.get("FLASK_DEBUG", "").lower() in ("1", "true", "yes"))

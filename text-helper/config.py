@@ -7,8 +7,14 @@ _config = None
 
 def _load():
     global _config
-    with open(_CONFIG_PATH, "r", encoding="utf-8") as f:
-        _config = yaml.safe_load(f)
+    if _config is not None:
+        return _config
+    try:
+        with open(_CONFIG_PATH, "r", encoding="utf-8") as f:
+            _config = yaml.safe_load(f)
+    except FileNotFoundError:
+        print("Error: config.yaml not found. Copy config.example.yaml to config.yaml and fill in your settings.")
+        raise
     return _config
 
 
@@ -17,7 +23,6 @@ def get_default_model():
     for m in cfg.get("models", []):
         if m.get("default"):
             return m["id"]
-    # fallback
     models = cfg.get("models", [])
     return models[0]["id"] if models else "gpt-4o"
 

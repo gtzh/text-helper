@@ -105,7 +105,6 @@ showPopup(text)
     encoded := UriEncode(text)
     url := "http://127.0.0.1:5000/popup?text=" . encoded
 
-    ; 查找 Chrome
     chromePaths := [
         A_AppData . "\..\Local\Google\Chrome\Application\chrome.exe",
         "C:\Program Files\Google\Chrome\Application\chrome.exe",
@@ -123,10 +122,10 @@ showPopup(text)
     if (browser != "") {
         MonitorGet(1, &MonLeft, &MonTop, &MonRight, &MonBottom)
         x := (MonRight - MonLeft - 490) // 2 + MonLeft
-        y := (MonBottom - MonTop - 420) // 2 + MonTop
-        Run("`"" . browser . "`" --user-data-dir=`"" . A_Temp . "\text-helper-chrome`" --app=`"" . url . "`" --window-size=490,420 --window-position=" . x . "," . y, , , &pid)
+        y := (MonBottom - MonTop - 480) // 2 + MonTop
+        Run("`"" . browser . "`" --user-data-dir=`"" . A_Temp . "\text-helper-chrome`" --app=`"" . url . "`" --window-size=490,480 --window-position=" . x . "," . y, , , &pid)
         Sleep 1200
-        WinMove(x, y, 490, 420, "划词助手")
+        WinMove(x, y, 490, 480, "划词助手")
     } else {
         Run(url)
     }
