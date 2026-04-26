@@ -1,0 +1,30 @@
+newapi:
+  base_url: "https://your-newapi-instance.example.com/v1"
+  api_key: "sk-your-api-key-here"
+  timeout: 300
+
+models:
+  - id: "ds"
+    name: "ds"
+    default: true
+  - id: "or"
+    name: "or"
+
+operations:
+  summarize:
+    label: "总结"
+    system_prompt: "用简洁的中文总结以下内容，提取核心要点："
+  explain:
+    label: "释义"
+    system_prompt: "详细解释以下内容，帮助理解其含义和背景："
+  rewrite:
+    label: "改写"
+    system_prompt: "改写以下文本，使其更加流畅专业，保持原意不变："
+  translate:
+    label: "翻译"
+    system_prompt: "将以下文本翻译成中文，只输出翻译结果，不要添加任何解释："
+
+popup:
+  width: 480
+  height: 400
+  max_input_chars: 8000
