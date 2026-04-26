@@ -120,12 +120,15 @@ showPopup(text)
     }
 
     if (browser != "") {
+        ; 将文本写入临时文件，避免 URL 过长
+        tmpFile := A_Temp . "\text-helper-selection.txt"
+        try FileDelete(tmpFile)
+        FileAppend(text, tmpFile, "UTF-8")
+
         MonitorGet(1, &MonLeft, &MonTop, &MonRight, &MonBottom)
         x := (MonRight - MonLeft - 490) // 2 + MonLeft
         y := (MonBottom - MonTop - 480) // 2 + MonTop
-        Run("`"" . browser . "`" --user-data-dir=`"" . A_Temp . "\text-helper-chrome`" --app=`"" . url . "`" --window-size=490,480 --window-position=" . x . "," . y, , , &pid)
-        Sleep 1200
-        WinMove(x, y, 490, 480, "划词助手")
+        Run("`"" . browser . "`" --user-data-dir=`"" . A_Temp . "\text-helper-chrome`" --app=http://127.0.0.1:5000/popup --window-size=490,480 --window-position=" . x . "," . y, , , &pid)
     } else {
         Run(url)
     }

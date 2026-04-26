@@ -265,7 +265,7 @@ body {
 </div>
 <script>
 const params = new URLSearchParams(location.search);
-const selectedText = params.get("text") || "";
+let selectedText = "";
 let currentOp = "";
 let currentModel = "";
 let abortCtrl = null;
@@ -274,6 +274,11 @@ let streamingMsgEl = null;
 
 async function init() {
   try {
+    // 从临时文件加载选中文本
+    const selResp = await fetch("/api/selection");
+    const selData = await selResp.json();
+    selectedText = selData.text || "";
+
     const r = await fetch("/api/config");
     const cfg = await r.json();
 

@@ -3,6 +3,7 @@
 
 import json
 import os
+import tempfile
 from pathlib import Path
 from flask import Flask, jsonify, request, send_file, Response, stream_with_context
 import markdown
@@ -27,9 +28,24 @@ def health():
     return jsonify({"status": "ok"})
 
 
+TEMP_SELECTION = Path(tempfile.gettempdir()) / "text-helper-selection.txt"
+
+
 @app.route("/popup")
 def popup():
     return send_file(STATIC_DIR / "popup.html")
+
+
+@app.route("/api/selection")
+def get_selection():
+    try:
+        if TEMP_SELECTION.exists():
+            text = TEMP_SELECTION.read_text(encoding="utf-8")
+        else:
+            text = ""
+    except Exception:
+        text = ""
+    return jsonify({"text": text})
 
 
 @app.route("/api/config")
